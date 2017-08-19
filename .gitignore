@@ -1,0 +1,27 @@
+syntax: glob
+
+*~
+.DS_Store
+Library
+Temp
+Ignore
+obj
+build
+Builds
+Install
+SimpleParticlePack
+*.booproj
+*.sln
+*.csproj
+*.csproj.user
+*.unityproj
+*.pidb
+*.userprefs
+*.suo
+*.apk
+*.orig
+*.orig.meta
+*.ppo
+*.ppo.meta
+Thumbs.db
+Ignore.meta
