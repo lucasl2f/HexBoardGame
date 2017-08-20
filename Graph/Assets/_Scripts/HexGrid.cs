@@ -73,19 +73,22 @@ public class HexGrid : MonoBehaviour {
 		label.text = cell.coordinates.ToStringOnSeparateLines();
 	}
 
-	public void ColorCell (Vector3 position, Color color) {
+	public void ColorCell (Vector3 position, Color color, CellType cellType) {
 		position = transform.InverseTransformPoint(position);
 		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 		int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
 		HexCell cell = cells[index];
-		//cell.color = color;
-		int i;
+		if (cell.TypeAllowed(cellType) || coordinates.Z == 0) {
+			cell.color = color;
+			cell.cellType = cellType;	
+			hexMesh.Triangulate(cells);
+		}
+		/*int i;
 		for (i = 0; i < cell.GetNeighbors().Length; i++) {
 			if (cell.GetNeighbor(i) != null) {
 				cell.GetNeighbors()[i].color = color;
 			}
-		}
-		hexMesh.Triangulate(cells);
-		Debug.Log("Touched at " + coordinates.ToString()); 
+		}*/
+		//Debug.Log("Touched at " + coordinates.ToString()); 
 	}
 }
