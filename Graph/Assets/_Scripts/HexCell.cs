@@ -11,6 +11,13 @@ public class HexCell : MonoBehaviour {
 	[SerializeField]
 	HexCell[] neighbors;
 
+	[SerializeField]
+	TextMesh myTypeText;
+
+	void Update() {
+		myTypeText.text = cellType.ToString();
+	}
+
 	public HexCell GetNeighbor (HexDirection direction) {
 		return neighbors[(int)direction];
 	}
@@ -29,27 +36,71 @@ public class HexCell : MonoBehaviour {
 	}
 
 	public bool TypeAllowed (CellType cellType) {
+		//Debug.Log("active: " + HexMapEditor.instance.hexGrid.activeCell.cellType);
+		//Debug.Log("cellType: " + cellType);
+
 		switch (cellType) {
 			case CellType.Water:
+			break;
 			case CellType.Mountain:
 			case CellType.Island:
-				return true;
+				if (HexMapEditor.instance.hexGrid.activeCell.cellType != CellType.Player1
+					&&HexMapEditor.instance.hexGrid.activeCell.cellType != CellType.Player2) {
+					return true;
+				}
 				break;
 			case CellType.Player1:
-			case CellType.Player2:
-				int i;
-				for (i = 0; i < neighbors.Length; i++) {
-					if (neighbors[i] != null) {
-						if (neighbors[i].cellType == cellType
-						    || neighbors[i].cellType == CellType.Island) {
-							return true;
+				if (HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Player1
+					|| HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Water) {
+					for (int i = 0; i < neighbors.Length; i++) {
+						if (neighbors[i] != null) {
+							if (neighbors[i].cellType == cellType
+								|| neighbors[i].cellType == CellType.Island) {
+								return true;
+							}
 						}
 					}
 				}
-
+				break;
+			case CellType.Player2:
+				if (HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Player2
+					|| HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Water) {
+					for (int i = 0; i < neighbors.Length; i++) {
+						if (neighbors[i] != null) {
+							if (neighbors[i].cellType == cellType
+								|| neighbors[i].cellType == CellType.Island) {
+								return true;
+							}
+						}
+					}
+				}
 				break;
 		}
 
 		return false;
 	}
+
+	/*public bool TypeAllowedToDestroy (CellType cellType) {
+		switch (cellType) {
+			case CellType.Water:
+			case CellType.Mountain:
+			case CellType.Island:
+			return false;
+
+			case CellType.Player1:
+				if (GameController.instance.playerActive == GameController.PlayerActive.Player2) {
+					return true;
+				}
+
+			break;
+
+			case CellType.Player2:
+				if (GameController.instance.playerActive == GameController.PlayerActive.Player1) {
+					return true;
+				}
+			break;
+		}
+		
+		return false;
+	}*/
 }

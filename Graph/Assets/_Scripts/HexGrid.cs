@@ -20,6 +20,16 @@ public class HexGrid : MonoBehaviour {
 	HexMesh hexMesh;
 	HexCell[] cells;
 
+	HexCell _activeCell, _neighborCell;
+	public HexCell activeCell {
+		get {
+			return _activeCell;
+		}
+	}
+
+	List<int> cellsPlayer1 = new List<int>();
+	List<int> cellsPlayer2 = new List<int>();
+
 	void Awake () {
 		gridCanvas = GetComponentInChildren<Canvas>();
 		hexMesh = GetComponentInChildren<HexMesh>();
@@ -77,11 +87,17 @@ public class HexGrid : MonoBehaviour {
 		position = transform.InverseTransformPoint(position);
 		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 		int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
-		HexCell cell = cells[index];
-		if (cell.TypeAllowed(cellType) || coordinates.Z == 0) {
-			cell.color = color;
-			cell.cellType = cellType;	
+		_activeCell = cells[index];
+		if (_activeCell.TypeAllowed(cellType) || coordinates.Z == 0) {
+			_activeCell.color = color;
+			_activeCell.cellType = cellType;	
 			hexMesh.Triangulate(cells);
+
+			if (cellType == CellType.Player1) {
+				cellsPlayer1.Add(index);
+			} else if (cellType == CellType.Player2) {
+				cellsPlayer2.Add(index);
+			}
 		}
 		/*int i;
 		for (i = 0; i < cell.GetNeighbors().Length; i++) {
@@ -90,5 +106,45 @@ public class HexGrid : MonoBehaviour {
 			}
 		}*/
 		//Debug.Log("Touched at " + coordinates.ToString()); 
+	}
+
+	public void DestroyCells (Vector3 position, int newQuantity) {
+		position = transform.InverseTransformPoint(position);
+		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
+		int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
+		_activeCell = cells[index];
+
+		if (GameController.instance.playerActive == GameController.PlayerActive.Player1 && _activeCell.cellType == CellType.Player2) {
+			Debug.Log("destroying cells " + _activeCell.cellType.ToString());
+			_activeCell.color = HexMapEditor.instance.colors[0]; //Water
+			_activeCell.cellType = CellType.Water;
+			hexMesh.Triangulate(cells);
+			newQuantity--;
+
+			//if (_activeCell.cellType == CellType.Player1) {
+				for (int i = 0; i < newQuantity; i++) {
+					for (int j = 0; j < _activeCell.GetNeighbors().Length; j++) {
+						if (_activeCell.GetNeighbor(j) != null && _activeCell.GetNeighbor(j).cellType == CellType.Player2) {
+							_activeCell = _activeCell.GetNeighbor(j);
+							_activeCell.color = HexMapEditor.instance.colors[0]; //Water
+							_activeCell.cellType = CellType.Water;
+							hexMesh.Triangulate(cells);
+							break;
+						}
+					}
+				}
+			//}
+		}
+
+
+
+
+/*if (_activeCell.TypeAllowed(cellType) || coordinates.Z == 0) {
+			_activeCell.color = color;
+			_activeCell.cellType = cellType;	
+			hexMesh.Triangulate(cells);
+		}
+}*/
+		
 	}
 }

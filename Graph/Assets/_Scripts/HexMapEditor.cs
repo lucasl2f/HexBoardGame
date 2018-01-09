@@ -13,9 +13,30 @@ public class HexMapEditor : MonoBehaviour {
 	Toggle[] toggles;
 
 	Color activeColor;
-	CellType activeCellType;
+	CellType _activeCellType;
+
+	bool _destruction;
+
+	public bool destruction {
+		get {
+			return _destruction;
+		}
+	}
+
+	[SerializeField]
+	Toggle destructionToggle;
+
+	public CellType activeCellType {
+		get {
+			return _activeCellType;
+		}	
+	}
+
+	public static HexMapEditor instance;
 
 	void Awake () {
+		instance = this;
+
 		SelectColor(0);
 	}
 
@@ -44,12 +65,21 @@ public class HexMapEditor : MonoBehaviour {
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
 		if (Physics.Raycast(inputRay, out hit)) {
-			hexGrid.ColorCell(hit.point, activeColor, activeCellType);
+			if (_destruction) {
+				hexGrid.DestroyCells(hit.point, 3);
+			} else {
+				hexGrid.ColorCell(hit.point, activeColor, _activeCellType);
+			}
 		}
 	}
 
 	public void SelectColor (int index) {
 		activeColor = colors[index];
-		activeCellType = (CellType)index;
+		_activeCellType = (CellType)index;
+	}
+
+	public void SetDestruction () {
+		_destruction = destructionToggle.isOn;
+		Debug.Log("destruction: " + _destruction);
 	}
 }
