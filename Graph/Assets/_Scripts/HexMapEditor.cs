@@ -66,7 +66,7 @@ public class HexMapEditor : MonoBehaviour {
 		RaycastHit hit;
 		if (Physics.Raycast(inputRay, out hit)) {
 			if (_destruction) {
-				hexGrid.DestroyCells(hit.point, 3);
+				hexGrid.DestroyCells(hit.point, Dice.RollD6());
 			} else {
 				hexGrid.ColorCell(hit.point, activeColor, _activeCellType);
 			}
@@ -79,7 +79,6 @@ public class HexMapEditor : MonoBehaviour {
 	}
 
 	public void SetDestruction () {
-		_destruction = destructionToggle.isOn;
-		Debug.Log("destruction: " + _destruction);
+		_destruction = destructionToggle.isOn;		
 	}
 }

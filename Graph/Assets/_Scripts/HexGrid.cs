@@ -20,7 +20,8 @@ public class HexGrid : MonoBehaviour {
 	HexMesh hexMesh;
 	HexCell[] cells;
 
-	HexCell _activeCell, _neighborCell;
+	HexCell _activeCell;
+	CellType _cellTarget;
 	public HexCell activeCell {
 		get {
 			return _activeCell;
@@ -113,38 +114,25 @@ public class HexGrid : MonoBehaviour {
 		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 		int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
 		_activeCell = cells[index];
-
-		if (GameController.instance.playerActive == GameController.PlayerActive.Player1 && _activeCell.cellType == CellType.Player2) {
-			Debug.Log("destroying cells " + _activeCell.cellType.ToString());
+		_cellTarget = GameController.instance.playerActive == GameController.PlayerActive.Player1 ? CellType.Player2 : CellType.Player1;
+		
+		if (_activeCell.cellType == _cellTarget) {
 			_activeCell.color = HexMapEditor.instance.colors[0]; //Water
 			_activeCell.cellType = CellType.Water;
 			hexMesh.Triangulate(cells);
 			newQuantity--;
 
-			//if (_activeCell.cellType == CellType.Player1) {
-				for (int i = 0; i < newQuantity; i++) {
-					for (int j = 0; j < _activeCell.GetNeighbors().Length; j++) {
-						if (_activeCell.GetNeighbor(j) != null && _activeCell.GetNeighbor(j).cellType == CellType.Player2) {
-							_activeCell = _activeCell.GetNeighbor(j);
-							_activeCell.color = HexMapEditor.instance.colors[0]; //Water
-							_activeCell.cellType = CellType.Water;
-							hexMesh.Triangulate(cells);
-							break;
-						}
+			for (int i = 0; i < newQuantity; i++) {
+				for (int j = 0; j < _activeCell.GetNeighbors().Length; j++) {
+					if (_activeCell.GetNeighbor(j) != null && _activeCell.GetNeighbor(j).cellType == _cellTarget) {
+						_activeCell = _activeCell.GetNeighbor(j);
+						_activeCell.color = HexMapEditor.instance.colors[0]; //Water
+						_activeCell.cellType = CellType.Water;
+						hexMesh.Triangulate(cells);
+						break;
 					}
 				}
-			//}
+			}
 		}
-
-
-
-
-/*if (_activeCell.TypeAllowed(cellType) || coordinates.Z == 0) {
-			_activeCell.color = color;
-			_activeCell.cellType = cellType;	
-			hexMesh.Triangulate(cells);
-		}
-}*/
-		
 	}
 }
