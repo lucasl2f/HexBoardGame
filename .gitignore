@@ -25,4 +25,5 @@ SimpleParticlePack
 *.ppo.meta
 Thumbs.db
 Ignore.meta
-Graph/
+Graph/.vscode/
+Graph/UnityPackageManager/
