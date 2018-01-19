@@ -2,105 +2,104 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HexCell : MonoBehaviour {
-	public HexCoordinates coordinates;
-	public Color color;
+public class HexCell : MonoBehaviour
+{
+    public HexCoordinates coordinates;
+    public Color color;
 
-	public CellType cellType;
+    public CellType cellType;
 
-	[SerializeField]
-	HexCell[] neighbors;
+    [SerializeField]
+    HexCell[] neighbors;
 
-	[SerializeField]
-	TextMesh myTypeText;
+    [SerializeField]
+    TextMesh myTypeText;
 
-	void Update() {
-		myTypeText.text = cellType.ToString();
-	}
+    HexCell _cellTemp;
 
-	public HexCell GetNeighbor (HexDirection direction) {
-		return neighbors[(int)direction];
-	}
+    public int myIndex;
 
-	public HexCell GetNeighbor (int index) {
-		return neighbors[index];
-	}
+    void Update()
+    {
+        myTypeText.text = cellType.ToString();
+    }
 
-	public HexCell[] GetNeighbors () {
-		return neighbors;
-	}
+    public HexCell GetNeighbor(HexDirection direction)
+    {
+        return neighbors[(int)direction];
+    }
 
-	public void SetNeighbor (HexDirection direction, HexCell cell) {
-		neighbors[(int)direction] = cell;
-		cell.neighbors[(int)direction.Opposite()] = this;
-	}
+    public HexCell GetNeighbor(int index)
+    {
+        return neighbors[index];
+    }
 
-	public bool TypeAllowed (CellType cellType) {
-		//Debug.Log("active: " + HexMapEditor.instance.hexGrid.activeCell.cellType);
-		//Debug.Log("cellType: " + cellType);
+    public HexCell[] GetNeighbors()
+    {
+        return neighbors;
+    }
 
-		switch (cellType) {
-			case CellType.Water:
-			break;
-			case CellType.Mountain:
-			case CellType.Island:
-				if (HexMapEditor.instance.hexGrid.activeCell.cellType != CellType.Player1
-					&&HexMapEditor.instance.hexGrid.activeCell.cellType != CellType.Player2) {
-					return true;
-				}
-				break;
-			case CellType.Player1:
-				if (HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Player1
-					|| HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Water) {
-					for (int i = 0; i < neighbors.Length; i++) {
-						if (neighbors[i] != null) {
-							if (neighbors[i].cellType == cellType
-								|| neighbors[i].cellType == CellType.Island) {
-								return true;
-							}
-						}
-					}
-				}
-				break;
-			case CellType.Player2:
-				if (HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Player2
-					|| HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Water) {
-					for (int i = 0; i < neighbors.Length; i++) {
-						if (neighbors[i] != null) {
-							if (neighbors[i].cellType == cellType
-								|| neighbors[i].cellType == CellType.Island) {
-								return true;
-							}
-						}
-					}
-				}
-				break;
-		}
+    public void SetNeighbor(HexDirection direction, HexCell cell)
+    {
+        neighbors[(int)direction] = cell;
+        cell.neighbors[(int)direction.Opposite()] = this;
+    }
 
-		return false;
-	}
+    public bool TypeAllowed(CellType cellType)
+    {
+        //Debug.Log("active: " + HexMapEditor.instance.hexGrid.activeCell.cellType);
+        //Debug.Log("cellType: " + cellType);
 
-	/*public bool TypeAllowedToDestroy (CellType cellType) {
-		switch (cellType) {
-			case CellType.Water:
-			case CellType.Mountain:
-			case CellType.Island:
-			return false;
+        _cellTemp = HexMapEditor.instance.hexGrid.activeCell;
 
-			case CellType.Player1:
-				if (GameController.instance.playerActive == GameController.PlayerActive.Player2) {
-					return true;
-				}
+        switch (cellType)
+        {
+            case CellType.Water:
+                break;
+            case CellType.Mountain:
+            case CellType.Island:
+                if (_cellTemp.cellType != CellType.Player1
+                    && _cellTemp.cellType != CellType.Player2)
+                {
+                    return true;
+                }
+                break;
+            case CellType.Player1:
+                if (_cellTemp.cellType == CellType.Player1
+                    || _cellTemp.cellType == CellType.Water)
+                {
+                    for (int i = 0; i < neighbors.Length; i++)
+                    {
+                        if (neighbors[i] != null)
+                        {
+                            if (neighbors[i].cellType == cellType
+                                || neighbors[i].cellType == CellType.Island)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                break;
+            case CellType.Player2:
+                if (HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Player2
+                    || HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Water)
+                {
+                    for (int i = 0; i < neighbors.Length; i++)
+                    {
+                        if (neighbors[i] != null)
+                        {
+                            if (neighbors[i].cellType == cellType
+                                || neighbors[i].cellType == CellType.Island)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                break;
+        }
 
-			break;
-
-			case CellType.Player2:
-				if (GameController.instance.playerActive == GameController.PlayerActive.Player1) {
-					return true;
-				}
-			break;
-		}
-		
-		return false;
-	}*/
+        return false;
+    }
 }

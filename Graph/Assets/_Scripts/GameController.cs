@@ -3,41 +3,71 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameController : MonoBehaviour {
-	
-	public enum PlayerActive {Player1, Player2};
+public class GameController : MonoBehaviour
+{
 
-	PlayerActive _playerActive;
+    #region Player
+    public enum PlayerActive { Player1, Player2 };
 
-	public PlayerActive playerActive {
-		get {
-			return _playerActive;
-		}
-	}
+    PlayerActive _playerActive;
 
-	[SerializeField]
-	Text playerActiveText;
-	
-	public static GameController instance;
-	
-	void Awake () {
-		instance = this;
+    public PlayerActive playerActive
+    {
+        get
+        {
+            return _playerActive;
+        }
+    }
 
-		_playerActive = PlayerActive.Player1;
-		playerActiveText.text = _playerActive.ToString() + " playing.";
-	}
-	
-	void Start() {
-		
-	}
+    [SerializeField]
+    Text playerActiveText;
+    #endregion
 
-	public void ChangePlayer () {		
-		if (_playerActive == PlayerActive.Player2) {
-			_playerActive = PlayerActive.Player1;
-		} else {
-			_playerActive = PlayerActive.Player2;
-		}
+    #region Cards
+    public enum Cards { NONE, Construction, Destruction, Modification, SayNo, Refresh }
+    Cards _cardActive;
 
-		playerActiveText.text = _playerActive.ToString() + " playing.";
-	}
+    public void SetCardActive(int cardIndex)
+    {
+        _cardActive = (Cards)cardIndex;
+        cardActiveText.text = _cardActive.ToString() + " in action.";
+    }
+
+    public Cards cardActive
+    {
+        get
+        {
+            return _cardActive;
+        }
+    }
+
+    [SerializeField]
+    Text cardActiveText;
+    #endregion
+
+    public static GameController instance;
+
+    void Awake()
+    {
+        instance = this;
+
+        _playerActive = PlayerActive.Player1;
+        playerActiveText.text = _playerActive.ToString() + " playing.";
+    }
+
+    public void ChangePlayer()
+    {
+        if (_playerActive == PlayerActive.Player2)
+        {
+            _playerActive = PlayerActive.Player1;
+        }
+        else
+        {
+            _playerActive = PlayerActive.Player2;
+        }
+
+        playerActiveText.text = _playerActive.ToString() + " playing.";
+    }
+
+
 }
