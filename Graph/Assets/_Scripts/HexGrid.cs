@@ -42,6 +42,8 @@ public class HexGrid : MonoBehaviour
     List<int> cellsPlayer1 = new List<int>();
     List<int> cellsPlayer2 = new List<int>();
 
+    List<int> _cellsVisitedTemp = new List<int>();
+
     void Awake()
     {
         gridCanvas = GetComponentInChildren<Canvas>();
@@ -59,21 +61,6 @@ public class HexGrid : MonoBehaviour
 
         //CreateCellPlayers(2, -1, height * width, CellType.Player1);
         //CreateCellPlayers(4, -1, height * width + 1, CellType.Player2);
-    }
-
-    void CreateCellPlayers(int x, int z, int i, CellType newType)
-    {
-        Vector3 position;
-        position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
-        position.y = 0f;
-        position.z = z * (HexMetrics.outerRadius * 1.5f);
-
-        HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
-        cell.transform.SetParent(transform, false);
-        cell.transform.localPosition = position;
-        cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-        cell.color = defaultColor;
-        cell.cellType = newType;
     }
 
     void Start()
@@ -122,13 +109,19 @@ public class HexGrid : MonoBehaviour
         {
             if (x == 1)
             {
+                cell.startingPoint = true;
                 cell.cellType = CellType.Player1;
                 cell.color = HexMapEditor.instance.colors[1];
+                cell.myIndex = cell.coordinates.X + cell.coordinates.Z * width + cell.coordinates.Z / 2;
+                cellsPlayer1.Add(cell.myIndex);
             }
             else if (x == (width - 2))
             {
+                cell.startingPoint = true;
                 cell.cellType = CellType.Player2;
                 cell.color = HexMapEditor.instance.colors[2];
+                cell.myIndex = cell.coordinates.X + cell.coordinates.Z * width + cell.coordinates.Z / 2;
+                cellsPlayer2.Add(cell.myIndex);
             }
         }
 
@@ -164,8 +157,7 @@ public class HexGrid : MonoBehaviour
     bool ConstructionAllowed(CellType cellType)
     {
         _cellTemp = _activeCell;
-        Debug.Log("looking for " + cellType);
-        cellsPlayer1.Clear();
+        _cellsVisitedTemp.Clear();
 
         switch (cellType)
         {
@@ -185,39 +177,26 @@ public class HexGrid : MonoBehaviour
                 {
                     for (int i = 0; i < HexMapEditor.instance.hexGrid.GetCellsCount; i++)
                     {
-                        Debug.Log("cell " + i.ToString());
                         for (int j = 0; j < _cellTemp.GetNeighbors().Length; j++)
                         {
-                            //Debug.Log("neighbor " + j.ToString());
                             if (_cellTemp.GetNeighbors()[j] != null)
                             {
-                                Debug.Log(_cellTemp.GetNeighbors()[j].cellType);
-                                Debug.Log(_cellTemp.GetNeighbors()[j].myIndex);
-
-                                foreach (int k in cellsPlayer1)
+                                if (_cellTemp.GetNeighbors()[j].cellType == cellType
+                                    && cellsPlayer1.Contains(_cellTemp.GetNeighbors()[j].myIndex))
                                 {
-                                    Debug.Log("element " + k);
-                                }
-
-                                if ((_cellTemp.GetNeighbors()[j].cellType == cellType
-                                    || _cellTemp.GetNeighbors()[j].cellType == CellType.Island)
-                                    && !cellsPlayer1.Contains(_cellTemp.GetNeighbors()[j].myIndex))
-                                {
-                                    //return true;
-                                    Debug.Log("Z" + _cellTemp.GetNeighbors()[j].coordinates.Z);
-                                    if (_cellTemp.GetNeighbors()[j].coordinates.Z == 0)
-                                    {
-                                        return true;
-                                    }
-                                    Debug.Log("valid neighbor");
-                                    cellsPlayer1.Add(_cellTemp.myIndex);
-                                    _cellTemp = _cellTemp.GetNeighbors()[j];
-                                    break;
+                                    return true;
                                 }
                                 else if (j == _cellTemp.GetNeighbors().Length - 1)
                                 {
                                     Debug.Log("false on " + j);
                                     return false;
+                                }
+                                else if (_cellTemp.GetNeighbors()[j].cellType == CellType.Island
+                                && !_cellsVisitedTemp.Contains(_cellTemp.GetNeighbors()[j].myIndex))
+                                {
+                                    _cellsVisitedTemp.Add(_cellTemp.GetNeighbors()[j].myIndex);
+                                    _cellTemp = _cellTemp.GetNeighbors()[j];
+                                    break;
                                 }
                             }
                         }
@@ -225,21 +204,36 @@ public class HexGrid : MonoBehaviour
                 }
                 break;
             case CellType.Player2:
-                /*if (HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Player2
-                    || HexMapEditor.instance.hexGrid.activeCell.cellType == CellType.Water)
+                if (_cellTemp.cellType == CellType.Player2
+                    || _cellTemp.cellType == CellType.Water)
                 {
-                    for (int i = 0; i < neighbors.Length; i++)
+                    for (int i = 0; i < HexMapEditor.instance.hexGrid.GetCellsCount; i++)
                     {
-                        if (neighbors[i] != null)
+                        for (int j = 0; j < _cellTemp.GetNeighbors().Length; j++)
                         {
-                            if (neighbors[i].cellType == cellType
-                                || neighbors[i].cellType == CellType.Island)
+                            if (_cellTemp.GetNeighbors()[j] != null)
                             {
-                                return true;
+                                if (_cellTemp.GetNeighbors()[j].cellType == cellType
+                                    && cellsPlayer2.Contains(_cellTemp.GetNeighbors()[j].myIndex))
+                                {
+                                    return true;
+                                }
+                                else if (j == _cellTemp.GetNeighbors().Length - 1)
+                                {
+                                    Debug.Log("false on " + j);
+                                    return false;
+                                }
+                                else if (_cellTemp.GetNeighbors()[j].cellType == CellType.Island
+                                && !_cellsVisitedTemp.Contains(_cellTemp.GetNeighbors()[j].myIndex))
+                                {
+                                    _cellsVisitedTemp.Add(_cellTemp.GetNeighbors()[j].myIndex);
+                                    _cellTemp = _cellTemp.GetNeighbors()[j];
+                                    break;
+                                }
                             }
                         }
                     }
-                }*/
+                }
                 break;
         }
 
@@ -253,13 +247,21 @@ public class HexGrid : MonoBehaviour
         int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
         _activeCell = cells[index];
         _cellTarget = GameController.instance.playerActive == GameController.PlayerActive.Player1 ? CellType.Player2 : CellType.Player1;
-
-        if (_activeCell.cellType == _cellTarget && _activeCell.coordinates.Z > 0)
+        if (_activeCell.cellType == _cellTarget && !_activeCell.startingPoint)
         {
             _activeCell.color = HexMapEditor.instance.colors[0]; //Water
             _activeCell.cellType = CellType.Water;
             hexMesh.Triangulate(cells);
             newQuantity--;
+
+            if (_cellTarget == CellType.Player1)
+            {
+                cellsPlayer1.Remove(_activeCell.myIndex);
+            }
+            else if (_cellTarget == CellType.Player2)
+            {
+                cellsPlayer2.Remove(_activeCell.myIndex);
+            }
 
             for (int i = 0; i < newQuantity; i++)
             {
@@ -268,12 +270,21 @@ public class HexGrid : MonoBehaviour
                     _cellTemp = _activeCell.GetNeighbor(j);
                     if (_cellTemp != null
                     && _cellTemp.cellType == _cellTarget
-                    && _cellTemp.coordinates.Z > 0)
+                    && !_cellTemp.startingPoint)
                     {
                         _activeCell = _cellTemp;
                         _activeCell.color = HexMapEditor.instance.colors[0]; //Water
                         _activeCell.cellType = CellType.Water;
                         hexMesh.Triangulate(cells);
+
+                        if (_cellTarget == CellType.Player1)
+                        {
+                            cellsPlayer1.Remove(_activeCell.myIndex);
+                        }
+                        else if (_cellTarget == CellType.Player2)
+                        {
+                            cellsPlayer2.Remove(_activeCell.myIndex);
+                        }
                         break;
                     }
                 }

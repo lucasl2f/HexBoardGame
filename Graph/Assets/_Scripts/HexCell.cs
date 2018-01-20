@@ -19,6 +19,8 @@ public class HexCell : MonoBehaviour
 
     public int myIndex;
 
+    public bool startingPoint;
+
     void Update()
     {
         myTypeText.text = cellType.ToString();
